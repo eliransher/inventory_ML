@@ -125,6 +125,9 @@ class leadtime_no_negative:
                 self.monitor['order_pending'] = True
                 self.env.process(self.order_process())
 
+            if self.demand_ind % 100000 == 0:
+                print('Current time: ', self.env.now, ' with inventory level: ', self.inventory.level)
+
     def order_process(self,):
 
         yield self.env.timeout(self.lead_times[self.lead_ind % self.lead_times.shape[0]])
@@ -167,7 +170,7 @@ def main():
 
     max_S = 50
     #
-    SIM_TIME = 100000000
+    SIM_TIME = 80000000
     num_samples = 60000000
     #
 

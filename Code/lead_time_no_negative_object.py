@@ -240,7 +240,7 @@ def main():
             full_path = os.path.join(dump_path, file_name)
             pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y)), open(full_path, 'wb'))
         except:
-            print('Error in example: ', exmaple, ' with s: ', s, ' and S: ', S, ' and Lead_scale: ', Lead_scale)
+            print('Error in example: ')
             
 
 if __name__ == "__main__":

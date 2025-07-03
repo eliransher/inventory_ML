@@ -177,29 +177,29 @@ def main():
     for exmaple in range(0, 1000):
 
         path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
+        try:
+            s  = np.random.randint(0, 20)
+    
+            S = np.random.randint(s + 1, max_S)
+    
+    
+            ys = []
+    
+            if sys.platform == 'linux':
+                path_dists = '/scratch/eliransc/ph_samples'
+                dump_path = '/scratch/eliransc/inv/lead_no_negative'
+            else:
+                path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
+                dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
+    
+    
+    
+            scv_demand = np.random.choice(os.listdir(path_dists))
+            scv_lead = np.random.choice(os.listdir(path_dists))
+    
+            Lead_scale = np.random.uniform(0.1, 10)
 
-        s  = np.random.randint(0, 20)
-
-        S = np.random.randint(s + 1, max_S)
-
-
-        ys = []
-
-        if sys.platform == 'linux':
-            path_dists = '/scratch/eliransc/ph_samples'
-            dump_path = '/scratch/eliransc/inv/lead_no_negative'
-        else:
-            path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
-            dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
-
-
-
-        scv_demand = np.random.choice(os.listdir(path_dists))
-        scv_lead = np.random.choice(os.listdir(path_dists))
-
-        Lead_scale = np.random.uniform(0.1, 10)
-
-        if True:
+        
 
             # print('Running simulation for ind: ', ind, ' with SIM_TIME: ', SIM_TIME)
             inv_lead = leadtime_no_negative(path_dists, scv_demand, scv_lead, Lead_scale ,S, s, max_S, SIM_TIME=SIM_TIME, num_samples=num_samples)
@@ -231,15 +231,17 @@ def main():
         # plt.title(f"(S,s) Inventory Distribution (s={s}, S={S}), error in zero={100*(ys[0][3]- ys[1][3])/ ys[0][3]}")
         # plt.show()
 
-        # Fulfillment rate
-        fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
-        print(f"Fulfilled Demand Rate: {fulfilrate:.4f}")
-        mod_num = np.random.randint(1, 10000000)
-
-        file_name = (str(mod_num)+ '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' + scv_lead + '_lead_scale_' + str(Lead_scale)
-                    + '_simtime_'+  str(SIM_TIME) + '.pkl')
-        full_path = os.path.join(dump_path, file_name)
-        pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y)), open(full_path, 'wb'))
+            # Fulfillment rate
+            fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
+            mod_num = np.random.randint(1, 10000000)
+    
+            file_name = (str(mod_num)+ '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' + scv_lead + '_lead_scale_' + str(Lead_scale)
+                        + '_simtime_'+  str(SIM_TIME) + '.pkl')
+            full_path = os.path.join(dump_path, file_name)
+            pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y)), open(full_path, 'wb'))
+        except:
+            print('Error in example: ', exmaple, ' with s: ', s, ' and S: ', S, ' and Lead_scale: ', Lead_scale)
+            
 
 if __name__ == "__main__":
 

@@ -1,5 +1,4 @@
 import time
-
 import simpy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +11,7 @@ import os, sys
 # from butools.ph import *
 import torch
 import time
-# from utils import *
+from utils import *
 
 
 class leadtime_no_negative:
@@ -73,8 +72,8 @@ class leadtime_no_negative:
         moms = dat[-2] 
         if scale != 1:
             T = dat[1]/scale
-            moms = np.array(torch.tensor(compute_moments(torch.tensor(dat[0]), torch.tensor(T), T.shape[0], 10))    )
-        print(moms)
+            moms = compute_first_n_moments(dat[0],T,10)
+            # moms = np.array(torch.tensor(compute_moments(torch.tensor(dat[0]), torch.tensor(T), T.shape[0], 10))    )
         return (dat[-1], moms)
 
 
@@ -125,8 +124,8 @@ class leadtime_no_negative:
                 self.monitor['order_pending'] = True
                 self.env.process(self.order_process())
 
-            if self.demand_ind % 100000 == 0:
-                print('Current time: ', self.env.now, ' with inventory level: ', self.inventory.level)
+            # if self.demand_ind % 100000 == 0:
+            #     print('Current time: ', self.env.now, ' with inventory level: ', self.inventory.level)
 
     def order_process(self,):
 
@@ -177,7 +176,7 @@ def main():
     for exmaple in range(0, 1000):
 
         path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
-        try:
+        if True:
             s  = np.random.randint(0, 20)
     
             S = np.random.randint(s + 1, max_S)
@@ -239,8 +238,8 @@ def main():
                         + '_simtime_'+  str(SIM_TIME) + '.pkl')
             full_path = os.path.join(dump_path, file_name)
             pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y)), open(full_path, 'wb'))
-        except:
-            print('Error in example: ')
+        # except:
+        #     print('Error in example: ')
             
 
 if __name__ == "__main__":

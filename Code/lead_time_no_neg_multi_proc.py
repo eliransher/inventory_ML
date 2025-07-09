@@ -162,7 +162,7 @@ from multiprocessing import Pool, cpu_count
 
 def main():
 
-    num_parallel_runs = 5  # or use cpu_count()
+    num_parallel_runs = 2  # or use cpu_count()
 
     with Pool(processes=num_parallel_runs) as pool:
         pool.map(run_single_simulation, range(num_parallel_runs))
@@ -208,4 +208,8 @@ def run_single_simulation(_):
 
 
 if __name__ == "__main__":
-    main()
+
+    for ind in range(200):
+        now = time.time()
+        main()
+        print(time.time() - now)

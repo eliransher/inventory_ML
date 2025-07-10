@@ -177,8 +177,7 @@ def run_single_simulation(_):
 
     if sys.platform == 'linux':
         path_dists = '/scratch/eliransc/ph_samples'
-        if not os.path.exists('/scratch/eliransc/inv/lead_no_negative_multi_proc'):
-            os.mkdir('/scratch/eliransc/inv/lead_no_negative_multi_proc')
+
         dump_path = '/scratch/eliransc/inv/lead_no_negative_multi_proc'
     else:
         path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'

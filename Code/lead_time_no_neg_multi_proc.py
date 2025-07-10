@@ -162,7 +162,7 @@ from multiprocessing import Pool, cpu_count
 
 def main():
 
-    num_parallel_runs = 4  # or use cpu_count()
+    num_parallel_runs = 2  # or use cpu_count()
 
     with Pool(processes=num_parallel_runs) as pool:
         pool.map(run_single_simulation, range(num_parallel_runs))
@@ -177,8 +177,7 @@ def run_single_simulation(_):
 
     if sys.platform == 'linux':
         path_dists = '/scratch/eliransc/ph_samples'
-
-        dump_path = '/scratch/eliransc/inv/lead_no_negative_multi_proc'
+        dump_path = '/scratch/eliransc/inv/lead_no_negative_multi_proc1'
     else:
         path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
         dump_path = r'C:\Users\Eshel\workspace\data\inv_data'

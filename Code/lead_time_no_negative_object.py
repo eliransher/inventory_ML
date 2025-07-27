@@ -65,7 +65,7 @@ class leadtime_no_negative:
 
         path = os.path.join(dist_path, ind)
         files = os.listdir(path)
-        ind_file = 0 #np.random.randint(0, len(files))
+        ind_file = np.random.randint(0, len(files))
         
         
         dat = pkl.load(open(os.path.join(path, files[ind_file]), 'rb'))

@@ -65,7 +65,7 @@ class leadtime_no_negative:
 
         path = os.path.join(dist_path, ind)
         files = os.listdir(path)
-        ind_file = np.random.randint(0, len(files))
+        ind_file = 0 #np.random.randint(0, len(files))
         
         
         dat = pkl.load(open(os.path.join(path, files[ind_file]), 'rb'))
@@ -169,7 +169,7 @@ def main():
 
     max_S = 50
     #
-    SIM_TIME = 500000000
+    SIM_TIME = 100000000
     num_samples = 60000000
     #
 
@@ -213,15 +213,15 @@ def main():
             fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
             # print(fulfilrate)
         # Bar width and positions
-        # width = 0.15
-        # x1 = x - width / 2
-        # x2 = x + width / 2
-        # 
-        # 
-        # print('SAE: ', np.abs(ys[0]- ys[1]).sum())
+        width = 0.15
+        x1 = x - width / 2
+        x2 = x + width / 2
 
+
+        # print('SAE: ', np.abs(ys[0]- ys[1]).sum())
+        # 
         # print(100*(ys[0]- ys[1])/ ys[0])
-        # Plot stationary distribution
+        # # Plot stationary distribution
         # plt.figure(figsize=(20, 10))
         # # plt.bar(distribution.keys(), distribution.values())
         # plt.bar(x1, ys[0], color='red', alpha=0.9, width =width)

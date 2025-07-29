@@ -91,7 +91,7 @@ class leadtime_no_negative:
     def run_simulation(self, ):
 
         self.env.process(self.demand_process())
-        self.env.process(self.monitor_inventory())
+        # self.env.process(self.monitor_inventory())
 
         self.env.run(until=self.SIM_TIME)
 
@@ -169,15 +169,15 @@ def main():
 
 def run_single_simulation(_):
     max_S = 50
-    SIM_TIME = 100000000
+    SIM_TIME = 180000000
     num_samples = 60000000
 
     s = np.random.randint(0, 20)
     S = np.random.randint(s + 1, max_S)
 
     if sys.platform == 'linux':
-        path_dists = '/scratch/eliransc/ph_samples'
-        dump_path = '/scratch/eliransc/inv/lead_no_negative_multi_proc4'
+        path_dists = '/home/elirans/scratch/ph_samples'
+        dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc'
     else:
         path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
         dump_path = r'C:\Users\Eshel\workspace\data\inv_data'

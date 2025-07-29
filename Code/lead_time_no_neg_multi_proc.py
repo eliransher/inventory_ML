@@ -171,6 +171,7 @@ def run_single_simulation(_):
     max_S = 50
     SIM_TIME = 180000000
     num_samples = 60000000
+    
 
     s = np.random.randint(0, 20)
     S = np.random.randint(s + 1, max_S)

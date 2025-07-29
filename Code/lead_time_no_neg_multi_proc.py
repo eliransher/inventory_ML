@@ -168,42 +168,48 @@ def main():
         pool.map(run_single_simulation, range(num_parallel_runs))
 
 def run_single_simulation(_):
-    max_S = 50
-    SIM_TIME = 180000000
-    num_samples = 60000000
     
-
-    s = np.random.randint(0, 20)
-    S = np.random.randint(s + 1, max_S)
-
-    if sys.platform == 'linux':
-        path_dists = '/home/elirans/scratch/ph_samples'
-        dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc'
-    else:
-        path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
-        dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
-
-    scv_demand = np.random.choice(os.listdir(path_dists))
-    scv_lead = np.random.choice(os.listdir(path_dists))
-
-    Lead_scale = np.random.uniform(0.1, 10)
-
-    inv_lead = leadtime_no_negative(path_dists, scv_demand, scv_lead, Lead_scale,
-                                    S, s, max_S, SIM_TIME=SIM_TIME, num_samples=num_samples)
-
-    distribution = inv_lead.run_simulation()
-    data = inv_lead.num_cust_durations
-    x = np.array(list(data.keys()))
-    y = np.array(list(data.values())) / SIM_TIME
-
-    fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
-    mod_num = np.random.randint(1, 10000000)
-
-    file_name = (str(mod_num) + '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' +
-                 scv_lead + '_lead_scale_' + str(Lead_scale) + '_simtime_' + str(SIM_TIME) + '.pkl')
-    full_path = os.path.join(dump_path, file_name)
-    pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y)), open(full_path, 'wb'))
-
+    try:
+    
+        max_S = 50
+        SIM_TIME = 180000000
+        num_samples = 60000000
+        
+    
+        
+        S = np.random.randint(1, max_S)
+        s = np.random.randint(0, S)
+    
+        if sys.platform == 'linux':
+            path_dists = '/home/elirans/scratch/ph_samples'
+            dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc'
+        else:
+            path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
+            dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
+    
+        scv_demand = np.random.choice(os.listdir(path_dists))
+        scv_lead = np.random.choice(os.listdir(path_dists))
+    
+        Lead_scale = np.random.uniform(0.1, 10)
+    
+        inv_lead = leadtime_no_negative(path_dists, scv_demand, scv_lead, Lead_scale,
+                                        S, s, max_S, SIM_TIME=SIM_TIME, num_samples=num_samples)
+    
+        distribution = inv_lead.run_simulation()
+        data = inv_lead.num_cust_durations
+        x = np.array(list(data.keys()))
+        y = np.array(list(data.values())) / SIM_TIME
+    
+        fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
+        mod_num = np.random.randint(1, 10000000)
+    
+        file_name = (str(mod_num) + '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' +
+                     scv_lead + '_lead_scale_' + str(Lead_scale) + '_simtime_' + str(SIM_TIME) + '.pkl')
+        full_path = os.path.join(dump_path, file_name)
+        pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y)), open(full_path, 'wb'))
+    
+    except:
+        print('bad sampling')
 
 
 if __name__ == "__main__":

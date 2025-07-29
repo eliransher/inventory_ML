@@ -11,4 +11,4 @@
 
 ml gcc python/3
 source /home/elirans/project/mom_match/bin/activate
-python /home/elirans/project/mom_analysis/code/lead_time_no_neg_multi_proc.py
+python /home/elirans/project/inventory_ML/Code/lead_time_no_neg_multi_proc.py

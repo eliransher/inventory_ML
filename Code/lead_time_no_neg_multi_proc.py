@@ -169,7 +169,7 @@ def main():
 
 def run_single_simulation(_):
     
-    try:
+    if True:
     
         max_S = 50
         SIM_TIME = 180000000
@@ -208,8 +208,8 @@ def run_single_simulation(_):
         full_path = os.path.join(dump_path, file_name)
         pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y)), open(full_path, 'wb'))
     
-    except:
-        print('bad sampling')
+    # except:
+    #     print('bad sampling')
 
 
 if __name__ == "__main__":

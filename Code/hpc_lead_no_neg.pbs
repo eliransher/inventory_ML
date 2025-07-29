@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#PBS -q WD
+#PBS -N mom_matchpdb
+#PBS -l select=8:ncpus=8:mpiprocs=8
+#PBS -l walltime=22:30:00
+#PBS -q RTX
+#PBS -m abe
+#PBS -M eliransh@ariel.ac.il
+
+
+ml gcc python/3
+source /home/elirans/project/mom_match/bin/activate
+python /home/elirans/project/mom_analysis/code/fit_moms_diff_matchers.py

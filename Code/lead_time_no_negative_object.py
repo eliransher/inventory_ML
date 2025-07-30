@@ -177,10 +177,9 @@ def main():
         try:
             ys = []
             path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
-    
-            s  = np.random.randint(0, 20)
-    
-            S = np.random.randint(s + 1, max_S)
+
+            S = np.random.randint(1, max_S)
+            s = np.random.randint(int(S/2), S)
     
     
             if sys.platform == 'linux':

@@ -156,8 +156,6 @@ def compute_moments(a, T, k, n):
     return moms
 
 
-
-
 from multiprocessing import Pool, cpu_count
 
 def main():

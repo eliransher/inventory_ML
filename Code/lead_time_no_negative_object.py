@@ -31,6 +31,8 @@ class leadtime_no_negative:
         self.demand_ind = 0
         self.lead_ind = 0
         self.monitor = {'last_time': 0, 'order_pending': False}
+        self.last_order = 0
+        self.reordertimes = []
 
         # a_demand, T_demand = self.dist(ind_demand_path, dist_path)
         # a_lead, T_lead = self.dist(ind_lead_path, dist_path)
@@ -134,6 +136,9 @@ class leadtime_no_negative:
         self.num_cust_durations[self.inventory.level] += self.env.now - self.last_event
         self.last_event = self.env.now
         yield self.inventory.put(self.S - self.inventory.level)
+        reorder_time = self.env.now - self.last_order
+        self.reordertimes.append(reorder_time)
+        self.last_order = self.env.now
         self.monitor['order_pending'] = False
 
     def monitor_inventory(self, ):
@@ -184,7 +189,7 @@ def main():
     
             if sys.platform == 'linux':
                 path_dists = '/scratch/eliransc/ph_samples'
-                dump_path = '/scratch/eliransc/inv/lead_no_negative_large_sim'
+                dump_path = '/scratch/eliransc/inv/lead_no_negative_large_sim_with_cycle'
             else:
                 path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
                 dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
@@ -194,7 +199,7 @@ def main():
     
             Lead_scale = np.random.uniform(0.1, 10)
     
-            for jj in range(1):
+            for jj in range(2):
     
     
                 print('Running simulation for ind: ', jj, ' with SIM_TIME: ', SIM_TIME)
@@ -203,40 +208,42 @@ def main():
                 distribution = inv_lead.run_simulation()
     
                 data = inv_lead.num_cust_durations
+
     
                 # Separate keys and values
                 x = np.array(list(data.keys()))
                 y = np.array(list(data.values()))/SIM_TIME
                 ys.append(y)
                 fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
+                print(np.array(inv_lead.reordertimes).mean())
+
                 # print(fulfilrate)
             # Bar width and positions
             width = 0.15
             x1 = x - width / 2
             x2 = x + width / 2
-    
-    
-            # print('SAE: ', np.abs(ys[0]- ys[1]).sum())
-            # 
-            # print(100*(ys[0]- ys[1])/ ys[0])
-            # # Plot stationary distribution
-            # plt.figure(figsize=(20, 10))
-            # # plt.bar(distribution.keys(), distribution.values())
-            # plt.bar(x1, ys[0], color='red', alpha=0.9, width =width)
-            # plt.bar(x2, ys[1], color='blue', alpha=0.9, width =width)
-            # plt.xlabel("Inventory Level")
-            # plt.ylabel("Stationary Probability")
-            # plt.title(f"(S,s) Inventory Distribution (s={s}, S={S}), error in zero={100*(ys[0][3]- ys[1][3])/ ys[0][3]}")
-            # plt.show()
+            #
+            print('SAE: ', np.abs(ys[0]- ys[1]).sum())
+            #
+            print(100*(ys[0]- ys[1])/ ys[0])
+            # Plot stationary distribution
+            plt.figure(figsize=(20, 10))
+            # plt.bar(distribution.keys(), distribution.values())
+            plt.bar(x1, ys[0], color='red', alpha=0.9, width =width)
+            plt.bar(x2, ys[1], color='blue', alpha=0.9, width =width)
+            plt.xlabel("Inventory Level")
+            plt.ylabel("Stationary Probability")
+            plt.title(f"(S,s) Inventory Distribution (s={s}, S={S}), error in zero={100*(ys[0][3]- ys[1][3])/ ys[0][3]}")
+            plt.show()
     
             # Fulfillment rate
     
             mod_num = np.random.randint(1, 10000000)
     
             file_name = (str(mod_num)+ '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' + scv_lead + '_lead_scale_' + str(Lead_scale)
-                        + '_simtime_'+  str(SIM_TIME) + '.pkl')
+                        + '_simtime_'+  str(SIM_TIME) + 'cycle_order.pkl')
             full_path = os.path.join(dump_path, file_name)
-            pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y)), open(full_path, 'wb'))
+            pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y, np.array(inv_lead.reordertimes).mean())), open(full_path, 'wb'))
             # except:
             #     print('Error in example: ')
         except:

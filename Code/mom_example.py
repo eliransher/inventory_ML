@@ -16,8 +16,9 @@ from utils import *
 
 class leadtime_no_negative:
 
-    def __init__(self, dist_path,  ind_demand_path, ind_lead_path, Lead_scale,S, s, max_S,num_samples = 100000, SIM_TIME = 10000):
-
+    def __init__(self, dist_path, ind_demand_path, ind_lead_path, Lead_scale, S, s, max_S,demands, leadtimes,
+                 true_arrivals, true_services, num_samples=100000,
+                 SIM_TIME=10000):
 
         self.SIM_TIME = SIM_TIME
         self.S = S
@@ -34,6 +35,10 @@ class leadtime_no_negative:
         self.last_order = 0
         self.reordertimes = []
 
+        self.demands = demands
+        self.lead_times = leadtimes
+
+
         # a_demand, T_demand = self.dist(ind_demand_path, dist_path)
         # a_lead, T_lead = self.dist(ind_lead_path, dist_path)
         # T_lead = T_lead * Lead_scale
@@ -42,17 +47,14 @@ class leadtime_no_negative:
         print('Start sampling')
         now = time.time()
 
-        self.demands, self.demand_moms = self.dist_from_file(ind_demand_path, dist_path, 1)
-        self.lead_times, self.lead_moms = self.dist_from_file(ind_lead_path, dist_path, Lead_scale)
-
-        np.random.shuffle(self.demands)
-        np.random.shuffle(self.lead_times)
 
 
-        self.lead_times = self.lead_times * Lead_scale
+        # np.random.shuffle(self.demands)
+        # np.random.shuffle(self.lead_times)
 
-        print(self.lead_times.mean(), (self.lead_times**2).mean(), Lead_scale)
+        # self.lead_times = self.lead_times * Lead_scale
 
+        print(self.lead_times.mean(), (self.lead_times ** 2).mean(), Lead_scale)
 
         end = time.time()
         tot_time = end - now
@@ -68,18 +70,16 @@ class leadtime_no_negative:
         path = os.path.join(dist_path, ind)
         files = os.listdir(path)
         ind_file = np.random.randint(0, len(files))
-        
-        
+
         dat = pkl.load(open(os.path.join(path, files[ind_file]), 'rb'))
-        moms = dat[-2] 
+        moms = dat[-2]
         if scale != 1:
-            T = dat[1]/scale
-            moms = compute_first_n_moments(dat[0],T,10)
+            T = dat[1] / scale
+            moms = compute_first_n_moments(dat[0], T, 10)
             # moms = np.array(torch.tensor(compute_moments(torch.tensor(dat[0]), torch.tensor(T), T.shape[0], 10))    )
         return (dat[-1], moms)
 
-
-    def dist(self,ind, dist_path):
+    def dist(self, ind, dist_path):
 
         files = os.listdir(dist_path)
 
@@ -89,15 +89,12 @@ class leadtime_no_negative:
             os.remove(os.path.join(dist_path, files[0]))
             print('Error loading file: ', files[0])
 
-
         if len(a.shape) == 2:
             a = a.reshape(-1)
 
         return (a, T)
 
-    def run_simulation(self,  ):
-
-
+    def run_simulation(self, ):
 
         self.env.process(self.demand_process())
         # self.env.process(self.monitor_inventory())
@@ -109,13 +106,10 @@ class leadtime_no_negative:
         distribution = {k: v / total_time for k, v in self.inventory_times.items()}
         return distribution
 
-    def demand_process(self,):
+    def demand_process(self, ):
 
         while True:
-
-
             yield self.env.timeout(self.demands[self.demand_ind % self.demands.shape[0]].item())
-
             self.demand_ind += 1
             self.total_demand += 1
 
@@ -132,7 +126,7 @@ class leadtime_no_negative:
             # if self.demand_ind % 100000 == 0:
             #     print('Current time: ', self.env.now, ' with inventory level: ', self.inventory.level)
 
-    def order_process(self,):
+    def order_process(self, ):
 
         yield self.env.timeout(self.lead_times[self.lead_ind % self.lead_times.shape[0]])
         self.lead_ind += 1
@@ -153,8 +147,6 @@ class leadtime_no_negative:
             self.monitor['last_time'] = now
 
 
-
-
 def compute_moments(a, T, k, n):
     """ generate first n moments of FT (a, T)
     m_i = ((-1) ** i) i! a T^(-i) 1
@@ -165,95 +157,115 @@ def compute_moments(a, T, k, n):
     one = torch.ones(k).double()
 
     moms = []
-    for i in range(1, n+1):
+    for i in range(1, n + 1):
         signed_factorial *= -i
-        T_powers = torch.matmul(T_powers, T_in)      # now T_powers is T^(-i)
-        moms.append( signed_factorial * a @ T_powers @ one)
+        T_powers = torch.matmul(T_powers, T_in)  # now T_powers is T^(-i)
+        moms.append(signed_factorial * a @ T_powers @ one)
 
     return moms
 
 
 def main():
-
     max_S = 50
     #
-    SIM_TIME = 180000000
+    SIM_TIME = 1000000
     num_samples = 60000000
     #
 
-    for exmaple in range(0, 1000):
+    for exmaple in range(0, 1):
         try:
             ys = []
             path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
 
             S = np.random.randint(1, max_S)
-            s = np.random.randint(int(3*S/5), S)
-    
-    
+            s = np.random.randint(int(S / 2), S)
+
+            S = 43
+            s = 10
+
+            samples_path = r'C:\Users\Eshel\workspace\mom_analysis\notebooks'
+
+            fit_arrivals, fit_services = pkl.load(open(os.path.join(samples_path, 'fit_samples_numeric_ggc.pkl'), 'rb'))
+            true_arrivals, true_services = pkl.load(open(os.path.join(samples_path, 'true_samples_numeric_ggc.pkl'), 'rb'))
+            Lead_scale = 4.24995351729483
+
+
+
+            fit_services = fit_services * 3
+            true_services  = true_services * 3
+
+            ph_samples = [(fit_arrivals,fit_services),(true_arrivals, true_services)]
+
+
             if sys.platform == 'linux':
                 path_dists = '/scratch/eliransc/ph_samples'
                 dump_path = '/scratch/eliransc/inv/lead_no_negative_large_sim_with_cycle'
             else:
                 path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
                 dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
-    
+
             scv_demand = np.random.choice(os.listdir(path_dists))
             scv_lead = np.random.choice(os.listdir(path_dists))
-    
-            Lead_scale = np.random.uniform(0.1, 10)
-    
-            for jj in range(1):
-    
-    
+
+            # Lead_scale = np.random.uniform(0.1, 10)
+
+            for jj in range(2):
                 print('Running simulation for ind: ', jj, ' with SIM_TIME: ', SIM_TIME)
-                inv_lead = leadtime_no_negative(path_dists, scv_demand, scv_lead, Lead_scale ,S , s, max_S, SIM_TIME=SIM_TIME, num_samples=num_samples)
-    
+                inv_lead = leadtime_no_negative(path_dists, scv_demand, scv_lead, Lead_scale, S, s, max_S,
+                                                ph_samples[jj][0], ph_samples[jj][1], true_arrivals, true_services,
+                                                SIM_TIME=SIM_TIME, num_samples=num_samples)
+
                 distribution = inv_lead.run_simulation()
-    
+                
                 data = inv_lead.num_cust_durations
 
-    
                 # Separate keys and values
                 x = np.array(list(data.keys()))
-                y = np.array(list(data.values()))/SIM_TIME
+                y = np.array(list(data.values())) / SIM_TIME
                 ys.append(y)
                 fulfilrate = inv_lead.fulfilled_demand / inv_lead.total_demand
                 print(np.array(inv_lead.reordertimes).mean())
 
                 # print(fulfilrate)
             # Bar width and positions
-            # width = 0.15
-            # x1 = x - width / 2
-            # x2 = x + width / 2
-            # #
-            # print('SAE: ', np.abs(ys[0]- ys[1]).sum())
-            # #
-            # print(100*(ys[0]- ys[1])/ ys[0])
-            # # Plot stationary distribution
-            # plt.figure(figsize=(20, 10))
-            # # plt.bar(distribution.keys(), distribution.values())
-            # plt.bar(x1, ys[0], color='red', alpha=0.9, width =width)
-            # plt.bar(x2, ys[1], color='blue', alpha=0.9, width =width)
-            # plt.xlabel("Inventory Level")
-            # plt.ylabel("Stationary Probability")
-            # plt.title(f"(S,s) Inventory Distribution (s={s}, S={S}), error in zero={100*(ys[0][3]- ys[1][3])/ ys[0][3]}")
-            # plt.show()
-            # 
+            width = 0.15
+            x1 = x - width / 2
+            x2 = x + width / 2
+            #
+            print('SAE: ', np.abs(ys[0] - ys[1]).sum())
+            #
+            print(100 * (ys[0] - ys[1]) / ys[0])
+            # Plot stationary distribution
+            plt.figure(figsize=(20, 10))
+            # plt.bar(distribution.keys(), distribution.values())
+            plt.bar(x1, ys[0], color='red', alpha=0.9, width=width)
+            plt.bar(x2, ys[1], color='blue', alpha=0.9, width=width)
+            plt.xlabel("Inventory Level")
+            plt.ylabel("Stationary Probability")
+            plt.title(
+                f"(S,s) Inventory Distribution (s={s}, S={S}), error in zero={100 * (ys[0][3] - ys[1][3]) / ys[0][3]}")
+            plt.show()
+
             # Fulfillment rate
-    
+
             mod_num = np.random.randint(1, 10000000)
-    
-            file_name = (str(mod_num)+ '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' + scv_lead + '_lead_scale_' + str(Lead_scale)
-                        + '_simtime_'+  str(SIM_TIME) + 'cycle_order.pkl')
+
+            file_name = (str(mod_num) + '_' + str(s) + '_' + str(
+                S) + '_' + scv_demand + '_' + scv_lead + '_lead_scale_' + str(Lead_scale)
+                         + '_simtime_' + str(SIM_TIME) + 'cycle_order.pkl')
             full_path = os.path.join(dump_path, file_name)
-            pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms),(fulfilrate, y, np.array(inv_lead.reordertimes).mean())), open(full_path, 'wb'))
+            pkl.dump(
+                ((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y, np.array(inv_lead.reordertimes).mean())),
+                open(full_path, 'wb'))
             # except:
             #     print('Error in example: ')
         except:
-            print('Error in example: ', exmaple, ' with s: ', s, ' and S: ', S, ' and scv_demand: ', scv_demand, ' and scv_lead: ', scv_lead)
+            print('Error in example: ', exmaple, ' with s: ', s, ' and S: ', S, ' and scv_demand: ', scv_demand,
+                  ' and scv_lead: ', scv_lead)
             continue
-            
+
 
 if __name__ == "__main__":
-
     main()
+
+

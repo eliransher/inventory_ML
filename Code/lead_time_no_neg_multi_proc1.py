@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import time
 import simpy
 import numpy as np
@@ -13,7 +12,7 @@ import os, sys
 import torch
 import time
 from utils import *
-from mpi4py import MPI
+
 
 class leadtime_no_negative:
 
@@ -32,8 +31,6 @@ class leadtime_no_negative:
         self.demand_ind = 0
         self.lead_ind = 0
         self.monitor = {'last_time': 0, 'order_pending': False}
-        self.last_order = 0
-        self.reordertimes = []
 
         # a_demand, T_demand = self.dist(ind_demand_path, dist_path)
         # a_lead, T_lead = self.dist(ind_lead_path, dist_path)
@@ -130,9 +127,6 @@ class leadtime_no_negative:
         self.num_cust_durations[self.inventory.level] += self.env.now - self.last_event
         self.last_event = self.env.now
         yield self.inventory.put(self.S - self.inventory.level)
-        reorder_time = self.env.now - self.last_order
-        self.reordertimes.append(reorder_time)
-        self.last_order = self.env.now
         self.monitor['order_pending'] = False
 
     def monitor_inventory(self, ):
@@ -162,8 +156,6 @@ def compute_moments(a, T, k, n):
     return moms
 
 
-
-
 from multiprocessing import Pool, cpu_count
 
 def main():
@@ -173,20 +165,18 @@ def main():
     with Pool(processes=num_parallel_runs) as pool:
         pool.map(run_single_simulation, range(num_parallel_runs))
 
-def run_single_simulation():
+def run_single_simulation(_):
     
     if True:
     
         max_S = 50
         SIM_TIME = 180000000
         num_samples = 60000000
-
         
-        # S = np.random.randint(1, max_S)
-        # s = np.random.randint(0, S)
-
+    
+        
         S = np.random.randint(1, max_S)
-        s = np.random.randint(int(3 * S / 5), S)
+        s = np.random.randint(0, S)
     
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'
@@ -215,27 +205,14 @@ def run_single_simulation():
                      scv_lead + '_lead_scale_' + str(Lead_scale) + '_simtime_' + str(SIM_TIME) + '.pkl')
         full_path = os.path.join(dump_path, file_name)
         pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y)), open(full_path, 'wb'))
-
-    #     print('bad sampling')
+    
     # except:
-
+    #     print('bad sampling')
 
 
 if __name__ == "__main__":
 
-    # for ind in range(200):
-    #     now = time.time()
-    #     main()
-    #     print(time.time() - now)
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-
-    print(f'Starting #{rank}/{size}')
-    ii = 0
-    while True:
-        print(f'Process {ii} #{rank}/{size}')
-        run_single_simulation()
-        ii += 1
-    print(f'done {sys.argv[0]} #{rank}/{size}')
-
+    for ind in range(200):
+        now = time.time()
+        main()
+        print(time.time() - now)

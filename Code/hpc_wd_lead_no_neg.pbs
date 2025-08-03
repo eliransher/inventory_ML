@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#PBS -N sim_pdb
+#PBS -l select=6:ncpus=36:mpiprocs=36
+# #PBS -l walltime=2:30:00
+#PBS -q WD
+#PBS -m abe
+#PBS -M eliransh@ariel.ac.il
+
+module load gcc openmpi hdf5/serial python/3
+source /home/elirans/project/mom_match/bin/activate
+mpirun python3 /home/elirans/project/inventory_ML/Code/lead_time_no_neg_multi_proc.py
+

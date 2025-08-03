@@ -168,7 +168,7 @@ from multiprocessing import Pool, cpu_count
 
 def main():
 
-    num_parallel_runs = 4  # or use cpu_count()
+    num_parallel_runs = 1  # or use cpu_count()
 
     with Pool(processes=num_parallel_runs) as pool:
         pool.map(run_single_simulation, range(num_parallel_runs))

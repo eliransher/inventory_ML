@@ -212,9 +212,9 @@ def run_single_simulation():
         mod_num = np.random.randint(1, 10000000)
     
         file_name = (str(mod_num) + '_' + str(s) + '_' + str(S) + '_' + scv_demand + '_' +
-                     scv_lead + '_lead_scale_' + str(Lead_scale) + '_simtime_' + str(SIM_TIME) + '.pkl')
+                     scv_lead + '_lead_scale_' + str(Lead_scale) + '_simtime_' + str(SIM_TIME) + 'cycle_order.pkl')
         full_path = os.path.join(dump_path, file_name)
-        pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y)), open(full_path, 'wb'))
+        pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y,  np.array(inv_lead.reordertimes).mean())), open(full_path, 'wb'))
 
     #     print('bad sampling')
     # except:

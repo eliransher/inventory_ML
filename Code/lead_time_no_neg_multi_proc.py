@@ -234,6 +234,9 @@ if __name__ == "__main__":
     print(f'Starting #{rank}/{size}')
     ii = 0
     while True:
+        import gc
+
+        gc.collect()
         try:
             print(f'Process {ii} #{rank}/{size}')
             run_single_simulation()

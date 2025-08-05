@@ -178,7 +178,7 @@ def run_single_simulation():
     if True:
     
         max_S = 50
-        SIM_TIME = 180000000
+        SIM_TIME = 18000
         num_samples = 60000000
 
         
@@ -234,8 +234,12 @@ if __name__ == "__main__":
     print(f'Starting #{rank}/{size}')
     ii = 0
     while True:
-        print(f'Process {ii} #{rank}/{size}')
-        run_single_simulation()
-        ii += 1
+        try:
+            print(f'Process {ii} #{rank}/{size}')
+            run_single_simulation()
+            ii += 1
+        except Exception as e:
+            print(f'Error in process {rank}/{size}: {e}')
+            break
     print(f'done {sys.argv[0]} #{rank}/{size}')
 

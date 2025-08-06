@@ -178,7 +178,7 @@ def run_single_simulation():
     if True:
     
         max_S = 50
-        SIM_TIME = 18000
+        SIM_TIME = 180000000
         num_samples = 60000000
 
         

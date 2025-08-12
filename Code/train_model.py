@@ -344,7 +344,10 @@ def main():
                 x = self.fc6(x)
                 return x
 
-        path_dump = r'C:\Users\Eshel\workspace\data\batches_10_moms_inv_no_neg'
+        if sys.platform == 'linux':
+             path_dump = r'C:\Users\Eshel\workspace\data\batches_10_moms_inv_no_neg_a'
+        else:
+            path_dump = r'C:\Users\Eshel\workspace\data\batches_10_moms_inv_no_neg'
 
         file_list = os.listdir(path_dump)
         data_paths = [os.path.join(path_dump, name) for name in file_list]
@@ -371,8 +374,10 @@ def main():
         # get first sample and unpack
         first_data = dataset[0]
         features, labels = first_data
-
-        path_valid_batch = r'C:\Users\Eshel\workspace\data\valid_batch_10'
+        if sys.platform == 'linux':
+            path_valid_batch = r'C:\Users\Eshel\workspace\data\valid_batch_10'
+        else:
+            path_valid_batch = r'C:\Users\Eshel\workspace\data\valid_batch_10'
         files = os.listdir(path_valid_batch)
         data_paths_valid = [os.path.join(path_valid_batch, name) for name in files]
 
@@ -413,9 +418,6 @@ def main():
 
         optimizer = optim.Adam(net.parameters(), lr=curr_lr,
                                weight_decay=(1 / 10 ** weight_decay))  # paramters is everything adjustable in model
-
-        loss_list = []
-        valid_list = {}
 
         num_probs_presenet = 20
         loss_list = []

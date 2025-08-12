@@ -187,6 +187,10 @@ def run_single_simulation():
 
         S = np.random.randint(1, max_S)
         s = np.random.randint(int(3 * S / 5), S)
+
+        s = np.random.randint(30, 49)
+        
+        S = np.random.randint(s + 1, 50) 
     
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'

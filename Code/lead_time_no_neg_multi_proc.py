@@ -190,11 +190,14 @@ def run_single_simulation():
 
         s = np.random.randint(30, 49)
         
-        S = np.random.randint(s + 1, 50) 
+        S = 17
+        s = np.random.randint(1, S)
     
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'
             dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc_and_cycle_large_s'
+            dump_path = '/home/elirans/scratch/inv/sim_by_S'
+
         else:
             path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
             dump_path = r'C:\Users\Eshel\workspace\data\inv_data'

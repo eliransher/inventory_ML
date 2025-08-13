@@ -177,8 +177,8 @@ def main():
 
     max_S = 50
     #
-    SIM_TIME = 180000000
-    num_samples = 60000000
+    SIM_TIME = 120000000
+    num_samples = 50000000
     #
 
     for exmaple in range(0, 1000):

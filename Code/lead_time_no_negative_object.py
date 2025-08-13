@@ -186,13 +186,13 @@ def main():
             ys = []
             path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
 
-            S = np.random.randint(1, max_S)
-            s = np.random.randint(int(3*S/5), S)
+            S = 17 #np.random.randint(1, max_S)
+            s = np.random.randint(1, S)
     
     
             if sys.platform == 'linux':
                 path_dists = '/scratch/eliransc/ph_samples'
-                dump_path = '/scratch/eliransc/inv/lead_no_negative_large_sim_with_cycle'
+                dump_path = '/scratch/eliransc/inv/by_S'
             else:
                 path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
                 dump_path = r'C:\Users\Eshel\workspace\data\inv_data'

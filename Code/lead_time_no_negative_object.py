@@ -197,8 +197,8 @@ def main():
                 path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
                 dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
     
-            scv_demand = np.random.choice(os.listdir(path_dists))
-            scv_lead = np.random.choice(os.listdir(path_dists))
+            scv_demand =   np.random.choice(os.listdir(path_dists))
+            scv_lead =  np.random.choice(os.listdir(path_dists))
     
             Lead_scale = np.random.uniform(0.1, 10)
     
@@ -251,7 +251,7 @@ def main():
             #     print('Error in example: ')
         except:
             print('Error in example: ', exmaple, ' with s: ', s, ' and S: ', S, ' and scv_demand: ', scv_demand, ' and scv_lead: ', scv_lead)
-            
+        #     
             
 
 if __name__ == "__main__":

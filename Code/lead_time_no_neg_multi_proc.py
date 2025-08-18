@@ -175,7 +175,7 @@ def main():
 
 def run_single_simulation():
     
-    if True:
+    try:
     
         max_S = 50
         SIM_TIME = 180000000
@@ -191,7 +191,10 @@ def run_single_simulation():
         s = np.random.randint(30, 49)
         
         S = 17
-        s = np.random.randint(10, S)
+        if np.random.rand() < 0.2:
+            s = np.random.randint(5, 10)
+        else:
+            s = np.random.randint(10, S)
     
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'
@@ -202,8 +205,8 @@ def run_single_simulation():
             path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
             dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
     
-        scv_demand = np.random.choice(os.listdir(path_dists))
-        scv_lead = np.random.choice(os.listdir(path_dists))
+        scv_demand = str(np.random.randint(4,21)) # np.random.choice(os.listdir(path_dists))
+        scv_lead = str(np.random.randint(1,21))  # np.random.choice(os.listdir(path_dists))
     
         Lead_scale = np.random.uniform(0.1, 10)
     
@@ -223,8 +226,8 @@ def run_single_simulation():
         full_path = os.path.join(dump_path, file_name)
         pkl.dump(((inv_lead.demand_moms, inv_lead.lead_moms), (fulfilrate, y,  np.array(inv_lead.reordertimes).mean())), open(full_path, 'wb'))
 
-    #     print('bad sampling')
-    # except:
+    except:
+        print('bad sampling')
 
 
 

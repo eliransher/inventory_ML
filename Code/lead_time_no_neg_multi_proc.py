@@ -191,8 +191,8 @@ def run_single_simulation():
         s = np.random.randint(30, 49)
         
         S = 17
-        if np.random.rand() < 0.2:
-            s = np.random.randint(5, 10)
+        if np.random.rand() < 0.4:
+            s = np.random.randint(1, 10)
         else:
             s = np.random.randint(10, S)
     
@@ -205,7 +205,7 @@ def run_single_simulation():
             path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
             dump_path = r'C:\Users\Eshel\workspace\data\inv_data'
     
-        scv_demand = str(np.random.randint(4,21)) # np.random.choice(os.listdir(path_dists))
+        scv_demand = str(np.random.randint(1,21)) # np.random.choice(os.listdir(path_dists))
         scv_lead = str(np.random.randint(1,21))  # np.random.choice(os.listdir(path_dists))
     
         Lead_scale = np.random.uniform(0.1, 10)

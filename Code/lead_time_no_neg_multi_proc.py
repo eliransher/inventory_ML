@@ -162,7 +162,33 @@ def compute_moments(a, T, k, n):
     return moms
 
 
+def sample_biased(S, size=1, scheme="linear", alpha=2.0, beta=0.3, rng=None):
+    """
+    Sample integers from {1, ..., S-1} with probability increasing in k.
 
+    scheme:
+      - "linear":    w_k = k
+      - "power":     w_k = k**alpha         (alpha > 1 -> stronger bias to large k)
+      - "exp":       w_k = exp(beta * k)    (beta > 0 -> stronger bias to large k)
+    """
+    if S <= 1:
+        raise ValueError("S must be >= 2 so the support {1,...,S-1} is non-empty.")
+    rng = np.random.default_rng(rng)
+    support = np.arange(1, S)
+
+    if scheme == "linear":
+        w = support.astype(float)
+    elif scheme == "power":
+        w = support.astype(float) ** float(alpha)
+    elif scheme == "exp":
+        # subtract max exponent for numerical stability
+        x = beta * support.astype(float)
+        w = np.exp(x - x.max())
+    else:
+        raise ValueError("scheme must be one of: 'linear', 'power', 'exp'")
+
+    p = w / w.sum()
+    return rng.choice(support, size=size, p=p)
 
 from multiprocessing import Pool, cpu_count
 
@@ -177,7 +203,7 @@ def run_single_simulation():
     
     try:
     
-        max_S = 50
+        max_S = 16
         SIM_TIME = 180000000
         num_samples = 60000000
 
@@ -185,21 +211,21 @@ def run_single_simulation():
         # S = np.random.randint(1, max_S)
         # s = np.random.randint(0, S)
 
-        S = np.random.randint(1, max_S)
-        s = np.random.randint(int(3 * S / 5), S)
+        S = np.random.randint(2, max_S)
+        s = sample_biased(S)[0]
 
-        s = np.random.randint(30, 49)
-        
-        S = 17
-        if np.random.rand() < 0.1:
-            s = np.random.randint(1, 12)
-        else:
-            s = np.random.randint(12, S)
+
+
+        #
+        # if np.random.rand() < 0.1:
+        #     s = np.random.randint(1, 12)
+        # else:
+        #     s = np.random.randint(12, S)
     
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'
             dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc_and_cycle_large_s'
-            dump_path = '/home/elirans/scratch/inv/sim_by_S'
+            dump_path = '/home/elirans/scratch/inv/S_16_lower'
 
         else:
             path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'

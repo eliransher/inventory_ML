@@ -186,7 +186,7 @@ def main():
             ys = []
             path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
 
-            S = np.random.randint(2, max_S)
+            S = np.random.randint(8, max_S)
             s = sample_biased(S)[0]
 
     

@@ -175,9 +175,9 @@ def compute_moments(a, T, k, n):
 
 def main():
 
-    max_S = 50
+    max_S = 17
     #
-    SIM_TIME = 120000000
+    SIM_TIME = 160000000
     num_samples = 50000000
     #
 
@@ -186,20 +186,15 @@ def main():
             ys = []
             path = r'C:\Users\Eshel\workspace\data\moment_anal\just_dists'
 
-            S = np.random.randint(1, max_S)
-            if np.random.rand() > 0.4:
-
-                diff = np.random.randint(1, 6)
-                s = np.max(S-diff, 1)
-
-            else:
-                s = np.random.randint(1, S)
+            S = np.random.randint(2, max_S)
+            s = sample_biased(S)[0]
 
     
     
             if sys.platform == 'linux':
                 path_dists = '/scratch/eliransc/ph_samples'
-                dump_path = '/scratch/eliransc/inv/lead_no_negative_large_sim_with_cycle'
+                dump_path = '/scratch/eliransc/inv/S_16_lower'
+
             else:
                 path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'
                 dump_path = r'C:\Users\Eshel\workspace\data\inv_data'

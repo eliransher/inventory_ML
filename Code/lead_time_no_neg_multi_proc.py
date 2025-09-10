@@ -203,7 +203,7 @@ def run_single_simulation():
     
     try:
     
-        max_S = 16
+        max_S = 17
         SIM_TIME = 180000000
         num_samples = 60000000
 
@@ -211,10 +211,8 @@ def run_single_simulation():
         # S = np.random.randint(1, max_S)
         # s = np.random.randint(0, S)
 
-        S = np.random.randint(2, max_S)
+        S = np.random.randint(16, max_S)
         s = sample_biased(S)[0]
-
-
 
         #
         # if np.random.rand() < 0.1:

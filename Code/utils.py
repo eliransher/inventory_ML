@@ -96,3 +96,30 @@ def create_erlang_row(rate, ind, size):
     return aa
 
 
+def sample_biased(S, size=1, scheme="linear", alpha=2.0, beta=0.3, rng=None):
+    """
+    Sample integers from {1, ..., S-1} with probability increasing in k.
+
+    scheme:
+      - "linear":    w_k = k
+      - "power":     w_k = k**alpha         (alpha > 1 -> stronger bias to large k)
+      - "exp":       w_k = exp(beta * k)    (beta > 0 -> stronger bias to large k)
+    """
+    if S <= 1:
+        raise ValueError("S must be >= 2 so the support {1,...,S-1} is non-empty.")
+    rng = np.random.default_rng(rng)
+    support = np.arange(1, S)
+
+    if scheme == "linear":
+        w = support.astype(float)
+    elif scheme == "power":
+        w = support.astype(float) ** float(alpha)
+    elif scheme == "exp":
+        # subtract max exponent for numerical stability
+        x = beta * support.astype(float)
+        w = np.exp(x - x.max())
+    else:
+        raise ValueError("scheme must be one of: 'linear', 'power', 'exp'")
+
+    p = w / w.sum()
+    return rng.choice(support, size=size, p=p)

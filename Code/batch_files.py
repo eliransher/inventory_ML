@@ -14,7 +14,7 @@ import tarfile
 from pathlib import Path
 
 
-for ind in range(2,7):
+for ind in range(7,8):
 
     path  = '//scratch/eliransc/inv/a_S_lower_'+str(ind)
     

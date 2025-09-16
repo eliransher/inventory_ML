@@ -13,20 +13,23 @@ import shutil
 import tarfile
 from pathlib import Path
 
-# Paths
-tar_path = Path("/scratch/eliransc/inv/a_S_lower_1.tar")
-extract_path = Path("/scratch/eliransc/inv")
-
-# Open and extract
-with tarfile.open(tar_path, "r") as tar:
-    tar.extractall(path=extract_path)
-
-print(f"Extracted {tar_path} into {extract_path}")
-
-
-
-
 path  = '//scratch/eliransc/inv/a_S_lower_1'
+
+if not os.path.exists(path):
+# Paths
+    tar_path = Path("/scratch/eliransc/inv/a_S_lower_1.tar")
+    extract_path = Path("/scratch/eliransc/inv")
+    
+    # Open and extract
+    with tarfile.open(tar_path, "r") as tar:
+        tar.extractall(path=extract_path)
+    
+    print(f"Extracted {tar_path} into {extract_path}")
+
+
+
+
+
 files  = os.listdir(path)
 
 

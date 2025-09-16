@@ -40,6 +40,11 @@ for batch_num in tqdm(range(num_batches)):
             S = int(files[file_num].split('_')[2])
             inp = np.concatenate((np.log(inp1[0][:10]), np.log(inp1[1][:10]), np.array([s, S])))
             out = out1[1][:18]
+            target_size = 18
+
+            if out.size < target_size:
+                out = np.pad(out, (0, target_size - out.size), mode='constant')
+
         except:
             print('keep the same')
         if batch_ind > 0:

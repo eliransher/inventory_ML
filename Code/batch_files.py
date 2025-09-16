@@ -7,7 +7,7 @@ import pandas as pd
 import sys
 sys.path.append('/home/eliransc/projects/def-dkrass/eliransc/mom_analysis/code')
 from utils import *
-
+from tqdm import tqdm
 import shutil
 
 import tarfile

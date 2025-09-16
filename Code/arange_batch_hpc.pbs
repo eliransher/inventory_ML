@@ -1,0 +1,14 @@
+#!/bin/sh
+
+#PBS -q WD
+#PBS -N sim_pdb
+#PBS -l select=1:ncpus=72:mpiprocs=72
+#PBS -l walltime=2:30:00
+#PBS -q RGB
+#PBS -m abe
+#PBS -M eliransh@ariel.ac.il
+
+
+ml gcc python/3
+source /home/elirans/project/mom_match/bin/activate
+python /home/elirans/project/inventory_ML/Code/ariel_batch.py

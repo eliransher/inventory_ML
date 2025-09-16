@@ -14,21 +14,21 @@ import tarfile
 from pathlib import Path
 
 
-for ind in range(7,8):
+for path in ['/scratch/eliransc/inv/a_S_lower','/scratch/eliransc/inv/b_S_lower']:
 
-    path  = '//scratch/eliransc/inv/a_S_lower_'+str(ind)
+    # path  = '//scratch/eliransc/inv/a_S_lower_'+str(ind)
     
-    if not os.path.exists(path):
-    # Paths
-        tar_path = Path("/scratch/eliransc/inv/a_S_lower_"+str(ind) + '.tar')
-        extract_path = Path("/scratch/eliransc/inv")
-        
-        # Open and extract
-        with tarfile.open(tar_path, "r") as tar:
-            tar.extractall(path=extract_path)
-        
-        print(f"Extracted {tar_path} into {extract_path}")
-    
+    # if not os.path.exists(path):
+    # # Paths
+    #     tar_path = Path("/scratch/eliransc/inv/a_S_lower_"+str(ind) + '.tar')
+    #     extract_path = Path("/scratch/eliransc/inv")
+    #     
+    #     # Open and extract
+    #     with tarfile.open(tar_path, "r") as tar:
+    #         tar.extractall(path=extract_path)
+    #     
+    #     print(f"Extracted {tar_path} into {extract_path}")
+    # 
     
     
     
@@ -68,10 +68,10 @@ for ind in range(7,8):
         batch_name = str(rand_num) + 'lead_no_neg_batch_17_lower_' + str(batch_num)+'.pkl'
         pkl.dump((input_, output_), open(os.path.join(path_dump, batch_name), 'wb'))
     
-    path = "/scratch/eliransc/inv/a_S_lower_"+str(ind)
-    
-    if os.path.exists(path):
-        shutil.rmtree(path)
-        print(f"Removed directory: {path}")
-    else:
-        print(f"Directory does not exist: {path}")
+    # path = "/scratch/eliransc/inv/a_S_lower_"+str(ind)
+    # 
+    # if os.path.exists(path):
+    #     shutil.rmtree(path)
+    #     print(f"Removed directory: {path}")
+    # else:
+    #     print(f"Directory does not exist: {path}")

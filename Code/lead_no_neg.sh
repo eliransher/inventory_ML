@@ -3,4 +3,4 @@
 #SBATCH -A def-dkrass
 #SBATCH --mem 45000
 source /home/eliransc/projects/def-dkrass/eliransc/mom_match/bin/activate
-python /home/eliransc/projects/def-dkrass/eliransc/inventory_ML/Code/lead_time_no_negative_object.py
+python /home/eliransc/projects/def-dkrass/eliransc/inventory_ML/Code/lead_time  _no_negative_object.py

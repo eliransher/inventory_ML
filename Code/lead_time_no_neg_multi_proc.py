@@ -203,7 +203,7 @@ def run_single_simulation():
     
     try:
     
-        max_S = 17
+        max_S = 35
         SIM_TIME = 180000000
         num_samples = 60000000
 
@@ -211,7 +211,7 @@ def run_single_simulation():
         # S = np.random.randint(1, max_S)
         # s = np.random.randint(0, S)
 
-        S = np.random.randint(16, max_S)
+        S = np.random.randint(18, max_S)
         s = sample_biased(S)[0]
 
         #
@@ -223,7 +223,8 @@ def run_single_simulation():
         if sys.platform == 'linux':
             path_dists = '/home/elirans/scratch/ph_samples'
             dump_path = '/home/elirans/scratch/inv/lead_no_negative_multi_proc_and_cycle_large_s'
-            dump_path = '/home/elirans/scratch/inv/S_16_lower'
+            dump_path = '/home/elirans/scratch/inv/S_18_higher'
+            dump_path = os.path.join(dump_path, str(np.random.randint(1, 6)))
 
         else:
             path_dists = r'C:\Users\Eshel\workspace\data\sampled_dat'

@@ -32,33 +32,41 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device
 
 
-def queue_loss1(output, targes, S, s, const=0.5):
-    cols = torch.arange(output.size(1), device='cuda')
-    mask = cols.unsqueeze(0) <= S.unsqueeze(1)  # shape: (3, 4)
-    logits = output.masked_fill(~mask, float('-inf'))
-    predictions = m(logits)
-
-    # cols = torch.arange(predictions.size(1), device='cuda')
-    # mask1 = (cols.unsqueeze(0) >= s.unsqueeze(1)) & (cols.unsqueeze(0) < S.unsqueeze(1))
-    # new_out = mask1 * predictions
-    # # x: (16, 51) tensor
-    # mask = new_out != 0
-    # counts = mask.sum(dim=1)
-
-    # # Replace zeros with +inf for min, and -inf for max
-    # x_min = new_out.masked_fill(~mask, float('inf')).min(dim=1).values
-    # x_max = new_out.masked_fill(~mask, float('-inf')).max(dim=1).values
-
-    # diffs = (x_max - x_min).mean()
+def queue_loss(predictions, targes, S, const=0.5):
+    predictions = m(predictions)
 
     only_S = torch.abs(targes[torch.arange(predictions.shape[0]).to(device), S] - predictions[
         torch.arange(predictions.shape[0]).to(device), S]).sum()
-    only_0 = torch.abs(targes[:, 0] - predictions[:, 0]).sum()
+
+    start_indices = 1 + S
+    cols = torch.arange(targes.size(1), device='cuda')
+    mask = cols.unsqueeze(0) >= start_indices.unsqueeze(1)  # shape: (3, 4)
 
     # Apply mask and sum
+    sums = (predictions * mask).sum()
     SAE = torch.abs(predictions - targes).sum(axis=1).sum()
+    # print(SAE, only_S, sums)
 
-    return SAE + 0.5 * only_S + 0.5 * only_0
+    return SAE + 0.1 * only_S + const * sums
+
+
+def compute_relative_abs_val(loader, model):
+    res = []
+    for i, (X, y) in enumerate(loader):
+        with torch.no_grad():
+            X = X.float()
+            X = X.reshape(-1, X.shape[2])  # X.reshape( X.shape[1], X.shape[2])
+            y = y.float()
+            y = y.reshape(-1, y.shape[2])  # y.reshape(y.shape[1], y.shape[2])
+            X = X.to(device)
+            y = y.to(device)
+
+            # Example forward pass
+            y_pred = model(X)
+
+            res.append(100 * torch.abs((y - y_pred) / y).mean())
+
+    return torch.tensor(res).mean()
 
 
 def valid(dset_val, model):
@@ -71,7 +79,14 @@ def valid(dset_val, model):
         y_valid = y_valid.reshape(-1, y_valid.shape[-1])
         X_valid = X_valid.to(device)
         y_valid = y_valid.to(device)
-        loss += queue_loss1(model(X_valid), y_valid, X_valid[:, -1].int(), X_valid[:, -2].int())
+
+        if torch.sum(torch.isinf(X_valid)).item() == 0:
+            model.zero_grad()
+            criterion = nn.MSELoss()  # or nn.BCELoss()
+            # Example forward pass
+            y_pred = model(X_valid)  # keep outputs between 0 and 1
+            loss += criterion(y_pred, y_valid)
+
     return loss / len(dset_val)
 
 
@@ -179,6 +194,26 @@ def compute_df_valid(valid_dl, model):
     return pd.concat(df_list)
 
 
+def compute_mean_abs_val(loader, model):
+    res = []
+    for i, (X, y) in enumerate(loader):
+        with torch.no_grad():
+            X = X.float()
+            X = X.reshape(-1, X.shape[2])  # X.reshape( X.shape[1], X.shape[2])
+            y = y.float()
+            y = y.reshape(-1, y.shape[2])  # y.reshape(y.shape[1], y.shape[2])
+            X = X.to(device)
+            y = y.to(device)
+
+            criterion = nn.MSELoss()  # or nn.BCELoss()
+            # Example forward pass
+            y_pred = torch.sigmoid(model(X))
+
+            res.append(torch.abs(y - y_pred).mean())
+
+    return torch.tensor(res).mean()
+
+
 def compute_sum_error1(valid_dl, model):
     with torch.no_grad():
         errors = []
@@ -226,51 +261,6 @@ def compute_sum_error1(valid_dl, model):
 
     return torch.tensor(errors).mean()
 
-def compute_df_valid(valid_dl, model):
-    df_list = []
-
-    with torch.no_grad():
-        errors = []
-
-        for batch in valid_dl:
-
-            df = pd.DataFrame([])
-
-            X_valid, y_valid = batch
-            X_valid = X_valid.float()
-            X_valid = X_valid.reshape(-1, X_valid.shape[2])
-            y_valid = y_valid.float()
-            y_valid = y_valid.reshape(-1, y_valid.shape[2])
-            X_valid = X_valid.to(device)
-            y_valid = y_valid.to(device)
-
-            targes = y_valid
-
-            predictions = model(X_valid)
-            predictions = m(predictions)
-
-            error = (torch.pow(torch.abs(predictions - targes), 1)).sum(axis=1)
-            errors.append(error.mean())
-
-            df['SAE'] = error.to('cpu')
-
-            for ind in range(X_valid.shape[0]):
-
-                for mom in range(num_arrival_moms):
-                    df.loc[ind, 'arrive_' + str(mom + 1)] = torch.exp(X_valid[ind, mom]).to('cpu').item()
-
-                for mom in range(num_ser_moms):
-                    df.loc[ind, 'arrive_' + str(mom + 1)] = torch.exp(X_valid[ind, num_arrival_moms + mom]).to(
-                        'cpu').item()
-
-                df.loc[ind, 'num_servers'] = X_valid[ind, -1].to('cpu').item()
-
-                df_list.append(df)
-
-    return pd.concat(df_list)
-
-m = nn.Softmax(dim=1)
-
 def main():
 
 
@@ -298,7 +288,7 @@ def main():
             x = np.concatenate((x1, x2, x3), axis=1)
 
             inputs = torch.from_numpy(x)
-            y = torch.from_numpy(y[:, :])
+            y = torch.from_numpy(y)
 
             return inputs, y
 
@@ -306,21 +296,17 @@ def main():
     import torch.nn as nn
     class Net(nn.Module):
 
-        def __init__(self, input_size, output_size):
+        def __init__(self, input_size, output_size=1):
             super().__init__()
 
             self.fc1 = nn.Linear(input_size, 50)
             self.fc2 = nn.Linear(50, 70)
-            self.fc3 = nn.Linear(70, 100)
-            self.fc4 = nn.Linear(100, 90)
-            self.fc5 = nn.Linear(90, 60)
-            self.fc6 = nn.Linear(60, output_size)
+            self.fc3 = nn.Linear(70, 70)
+            self.fc4 = nn.Linear(70, 60)
+            self.fc5 = nn.Linear(60, 50)
+            self.fc6 = nn.Linear(50, output_size)
 
-            # self.fc1 = nn.Linear(input_size , 50)
-            # self.fc2 = nn.Linear(50, 50)
-            # self.fc3 = nn.Linear(50, 55)
-            # self.fc4 = nn.Linear(55, 52)
-            # self.fc5 = nn.Linear(52, output_size)
+
 
         def forward(self, x):
             x = F.relu(self.fc1(x))
@@ -333,7 +319,7 @@ def main():
 
 
 
-    for num_moms in range(7,11):
+    for num_moms in range(2,11):
 
         num_arrival_moms, num_ser_moms = num_moms, num_moms
 
@@ -343,7 +329,7 @@ def main():
 
 
         print(num_arrival_moms, num_ser_moms, batch_size)
-        path_dump = r'C:\Users\Eshel\workspace\data\inv_all_data\batch_files_fir\batch_files'
+        path_dump = r'C:\Users\Eshel\workspace\data\inv_all_data\batch_cycle_time'
         file_list = os.listdir(path_dump)
         data_paths = [os.path.join(path_dump, name) for name in file_list]
 
@@ -358,7 +344,7 @@ def main():
         first_data = dataset[0]
         features, labels = first_data
 
-        path_valid_batch = r'C:\Users\Eshel\workspace\data\inv_all_data\batch_files_fir\batch_valid_files'  # r'C:\Users\Eshel\workspace\data\valid_batch_10'
+        path_valid_batch = r'C:\Users\Eshel\workspace\data\inv_all_data\batch_cycle_valid'  # r'C:\Users\Eshel\workspace\data\valid_batch_10'
         # path_valid_batch = r'C:\Users\Eshel\workspace\data\inv_all_data\valid_batch_by_S\17' #r'C:\Users\Eshel\workspace\data\valid_batch_10'
 
         files = os.listdir(path_valid_batch)
@@ -382,7 +368,7 @@ def main():
         net = Net(input_size, output_size).to(device)
         weight_decay = 5
         curr_lr = 0.0005
-        EPOCHS = 125
+        EPOCHS = 100
         now = datetime.now()
         lr_second = 0.99
         lr_first = 0.75
@@ -400,7 +386,7 @@ def main():
         num_probs_presenet = 20
         loss_list = []
         valid_list = []
-        valid_SAE = []
+        valid_abs_list = []
 
         for epoch in range(EPOCHS):
 
@@ -417,26 +403,32 @@ def main():
 
                 if torch.sum(torch.isinf(X)).item() == 0:
                     net.zero_grad()
-                    output = net(X)
+                    # criterion = nn.MSELoss()
+                    y_pred = net(X)
 
-                    loss = queue_loss1(output, y, X[:, -1].int(),
-                                       X[:, -2].int())  # 1 of two major ways to calculate loss
+                    # Compute loss
+                    loss = ((y_pred - y) ** 2).mean()
+                    # if torch.isnan(loss).any().item():
+                    #     break
+                    # print(loss) # keep outputs between 0 and 1
+
+                    # loss = queue_loss1(output, y, X[:,-1].int(), X[:,-2].int())  # 1 of two major ways to calculate loss
                     # print('loss', loss)
                     loss.backward()
                     optimizer.step()
                     net.zero_grad()
 
-
-            # print('Compute validation')
+            # valid_abs_list print('Compute validation')
             loss_list.append(loss.item())
             valid_list.append(valid(valid_loader, net).item())
-            valid_SAE.append(compute_sum_error1(valid_loader, net).item())
+            valid_abs_list.append(compute_relative_abs_val(valid_loader, net))
+            # valid_SAE.append(compute_sum_error1(valid_loader, net).item())
             # for folder in os.listdir(test_paths):
 
             #     valid_list[folder].append(valid(valid_loader[folder], net, num_ser_moms).item())
             #     compute_sum_error_list[folder].append(compute_sum_error(valid_loader[folder], net, num_ser_moms, False).item())
             print(
-                f"epoch: {epoch} ,loss: {loss_list[-1]}, loss valid: {valid_list[-1]}, valid_SAE: {valid_SAE[-1]}, time: {time.time() - t_0}")
+                f"epoch: {epoch} ,loss: {loss_list[-1]}, loss valid: {valid_list[-1]}, abs valid: {valid_abs_list[-1]}, time: {time.time() - t_0}")
 
             if len(loss_list) > 8:
                 if check_loss_increasing(valid_list):
@@ -449,17 +441,16 @@ def main():
                     print(curr_lr)
 
 
-
             model_path =         r'C:\Users\Eshel\workspace\inventory_training\mom_anal\models'
             model_results_path = r'C:\Users\Eshel\workspace\inventory_training\mom_anal\results'
 
 
-            file_name = 'inv_dist_' + '_batchsize_'  + str(batch_size)  + '_demand_' +str(num_arrival_moms) + '_leadtime_' +str(num_ser_moms) + '.pkl'
+            file_name = 'cycle_' + '_batchsize_'  + str(batch_size)  + '_demand_' +str(num_arrival_moms) + '_leadtime_' +str(num_ser_moms) + '.pkl'
 
             file_name_model  = 'model_'  + file_name
             file_name_model_result = 'res_'  + file_name
             torch.save(net.state_dict(), os.path.join(model_path, file_name_model))
-            pkl.dump((valid_SAE, valid_list, loss_list), open(os.path.join(model_results_path,file_name_model_result), 'wb'))
+            pkl.dump((valid_abs_list, valid_list, loss_list), open(os.path.join(model_results_path,file_name_model_result), 'wb'))
 
 
 if __name__ == '__main__':
